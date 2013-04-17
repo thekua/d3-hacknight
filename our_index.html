@@ -53,6 +53,8 @@
 //    });
 
 
+
+
     // Chart dimensions.
     var margin = {top: 19.5, right: 19.5, bottom: 19.5, left: 39.5},
             width = 960 - margin.right,
@@ -68,8 +70,6 @@
     // The x & y axes.
     var xAxis = d3.svg.axis().orient("bottom").scale(xScale).ticks(25),
             yAxis = d3.svg.axis().scale(yScale).orient("left");
-
-
 
     // Create the SVG container and set the origin.
     var svg = d3.select("#chart").append("svg")
@@ -88,6 +88,23 @@
     svg.append("g")
             .attr("class", "y axis")
             .call(yAxis);
+
+// Add a dot per nation. Initialize the data at 1800, and set the colors.
+var dot = svg.append("g")
+        .attr("class", "dots")
+        .selectAll(".dot")
+        .data([{color: "#ff0000", x: 10, y: 60000, radius: 100 }])
+        .enter().append("circle")
+        .attr("class", "dot")
+        .style("fill", function(d) { return d.color; })
+        .call(position);
+
+
+function position(dot) {
+    dot .attr("cx", function(d) { return xScale(d.x); })
+            .attr("cy", function(d) { return yScale(d.y); })
+            .attr("r", function(d) { return d.radius; });
+}
 
 
 </script>
