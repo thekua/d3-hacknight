@@ -50,21 +50,35 @@
 
 <script type="text/javascript">
     d3.csv("control-immigration-q1-2011-main.csv", function(unparsedData) {
-        var data = unparsedData.map(function(row) {
+        var interestingData = unparsedData.slice(7);
+        var convert = function(quarter, value) {
+            var value = value.replace(/,/, ''); // get rid of formatting
+            var parsedNumber = parseInt(value);
+            if (isNaN(parsedNumber)) {  // deal with funny characters
+                parsedNumber = 0;
+            }
+            console.log(parsedNumber, value);
+            return {
+                x: quarter,
+                y: parsedNumber,
+                radius: 10,
+                color: "#ff0000"
+            };
+        };
+        var data = interestingData.map(function(row) {
             return row["Q1 2005"];
         });
-        drawChart(data);
+        var result = data.map(function(value) {
+            return convert(1, value);
+        });
+        drawChart(result);
     });
 
     var drawChart = function(data) {
         d3.csv("control-immigration-q1-2011-main.csv")
                 .row(function(row) { return row["Q1 2005"]; });
 
-        var convertedData = data;
-        console.log(convertedData);
-
-
-
+        console.log(data);
 
         // Chart dimensions.
         var margin = {top: 19.5, right: 19.5, bottom: 19.5, left: 39.5},
@@ -103,9 +117,9 @@
 // Add a dot per nation. Initialize the data at 1800, and set the colors.
 
 
-        var data = [
-            {color: "#ff0000", x: 10, y: 60000, radius: 100 }
-        ];
+//        var data = [
+//            {color: "#ff0000", x: 10, y: 60000, radius: 100 }
+//        ];
         var dot = svg.append("g")
                 .attr("class", "dots")
                 .selectAll(".dot")
