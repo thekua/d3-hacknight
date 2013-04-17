@@ -1,6 +1,7 @@
 <html>
 <head>
     <script type="text/javascript" src="lib/d3.v3.min.js"></script>
+    <script type="text/javascript" src="lib/underscore-min.js"></script>
     <style>
 
         #chart {
@@ -49,15 +50,23 @@
 <div id="chart"></div>
 
 <script type="text/javascript">
+
+//    var list = [{x: 1, y: 2}, {x: 4, y: 5}];
+//
+//    var convert = function(element) {
+//        return element.y;
+//    };
+//    var result = _.map(list, convert);
+
+
     d3.csv("control-immigration-q1-2011-main.csv", function(unparsedData) {
-        var interestingData = unparsedData.slice(7);
+        var interestingData = unparsedData.slice(18);
         var convert = function(quarter, value) {
             var value = value.replace(/,/, ''); // get rid of formatting
             var parsedNumber = parseInt(value);
             if (isNaN(parsedNumber)) {  // deal with funny characters
                 parsedNumber = 0;
             }
-            console.log(parsedNumber, value);
             return {
                 x: quarter,
                 y: parsedNumber,
@@ -65,13 +74,20 @@
                 color: "#ff0000"
             };
         };
-        var data = interestingData.map(function(row) {
-            return row["Q1 2005"];
+        var resultList = [];
+        var quarters = ["Q1 2005", "Q2 2005", "Q3 2005", "Q4 2005", "Q1 2006", "Q2 2006", "Q3 2006", "Q4 2006", "Q1 2007", "Q2 2007", "Q3 2007", "Q4 2007", "Q1 2008", "Q2 2008", "Q3 2008", "Q4 2008", "Q1 2009", "Q2 2009", "Q3 2009", "Q4 2009", "Q1 2010", "Q2 2010", "Q3 2010", "Q4 2010", "Q1 2011"];
+        
+        _.each(quarters, function(key, index) {
+            var data = interestingData.map(function(row) {
+                return row[key];
+            });
+            var result = data.map(function(value) {
+                return convert(index + 1, value);
+            });
+            resultList = resultList.concat(result);
         });
-        var result = data.map(function(value) {
-            return convert(1, value);
-        });
-        drawChart(result);
+
+        drawChart(resultList);
     });
 
     var drawChart = function(data) {
