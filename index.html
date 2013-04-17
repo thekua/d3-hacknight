@@ -1,33 +1,90 @@
 <html>
 <head>
     <script type="text/javascript" src="lib/d3.v3.min.js"></script>
+    <style>
+
+        #chart {
+            margin-left: -40px;
+            height: 506px;
+        }
+
+        text {
+            font: 10px sans-serif;
+        }
+
+        .dot {
+            stroke: #000;
+        }
+
+        .axis path, .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        .label {
+            fill: #777;
+        }
+
+        .year.label {
+            font: 500 196px "Helvetica Neue";
+            fill: #ddd;
+        }
+
+        .year.label.active {
+            fill: #aaa;
+        }
+
+        .overlay {
+            fill: none;
+            pointer-events: all;
+            cursor: ew-resize;
+        }
+
+
+    </style>
 </head>
 <body>
-<div id="viz"></div>
+<h1>Visa Allowances</h1>
+<div id="chart"></div>
+
 <script type="text/javascript">
-    d3.text("control-immigration-q1-2011-main.csv", function(unparsedData) {
-        console.log("Test");
-        console.log("test2");
-        console.log("test3");
-    });
+//    d3.text("control-immigration-q1-2011-main.csv", function(unparsedData) {
+//    });
 
-    var sampleSVG = d3.select("#viz")
-            .append("svg")
-            .attr("width", 100)
-            .attr("height", 100);
 
-    sampleSVG.append("circle")
-            .style("stroke", "gray")
-            .style("fill", "white")
-            .attr("r", 40)
-            .attr("cx", 50)
-            .attr("cy", 50)
-            .on("mouseover", function () {
-                d3.select(this).style("fill", "aliceblue");
-            })
-            .on("mouseout", function () {
-                d3.select(this).style("fill", "white");
-            });
+    // Chart dimensions.
+    var margin = {top: 19.5, right: 19.5, bottom: 19.5, left: 39.5},
+            width = 960 - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+
+    // Various scales. These domains make assumptions of data, naturally.
+    var xScale = d3.scale.linear().domain([0, 25]).range([0, width]),
+            yScale = d3.scale.linear().domain([0, 120000]).range([height, 0]);
+
+    // The x & y axes.
+    var xAxis = d3.svg.axis().orient("bottom").scale(xScale).ticks(12, d3.format(",d")),
+            yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+    // Create the SVG container and set the origin.
+    var svg = d3.select("#chart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add the x-axis.
+    svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+    // Add the y-axis.
+    svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
 
 </script>
 <p>hello world</p>
