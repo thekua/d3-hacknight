@@ -58,10 +58,17 @@
 //    };
 //    var result = _.map(list, convert);
 
+    var typesToColors = {
+        "Employment" : "#ff0000",
+        "Study" : "#00ff00",
+        "Family route" : "#0000ff",
+        "Dep. joining / acc" : "#cc0000",
+        "Other" : "#cccccc"
+    };
 
     d3.csv("control-immigration-q1-2011-main.csv", function(unparsedData) {
         var interestingData = unparsedData.slice(18);
-        var convert = function(quarter, value) {
+        var convert = function(quarter, value, type) {
             var value = value.replace(/,/, ''); // get rid of formatting
             var parsedNumber = parseInt(value);
             if (isNaN(parsedNumber)) {  // deal with funny characters
@@ -71,18 +78,20 @@
                 x: quarter,
                 y: parsedNumber,
                 radius: 10,
-                color: "#ff0000"
+                color: typesToColors[type]
             };
         };
         var resultList = [];
         var quarters = ["Q1 2005", "Q2 2005", "Q3 2005", "Q4 2005", "Q1 2006", "Q2 2006", "Q3 2006", "Q4 2006", "Q1 2007", "Q2 2007", "Q3 2007", "Q4 2007", "Q1 2008", "Q2 2008", "Q3 2008", "Q4 2008", "Q1 2009", "Q2 2009", "Q3 2009", "Q4 2009", "Q1 2010", "Q2 2010", "Q3 2010", "Q4 2010", "Q1 2011"];
-        
+
+        var typeRow = interestingData["Type"];
+        console.log("Types", interestingData);
+
         _.each(quarters, function(key, index) {
-            var data = interestingData.map(function(row) {
-                return row[key];
-            });
-            var result = data.map(function(value) {
-                return convert(index + 1, value);
+            var result = interestingData.map(function(row) {
+                var type = row["Type"];
+                var value = row[key];
+                return convert(index + 1, value, type);
             });
             resultList = resultList.concat(result);
         });
