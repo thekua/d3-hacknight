@@ -72,7 +72,7 @@
             var value = value.replace(/,/, ''); // get rid of formatting
             var parsedNumber = parseInt(value);
             if (isNaN(parsedNumber)) {  // deal with funny characters
-                parsedNumber = 0;
+                parsedNumber = 1;
             }
             return {
                 x: quarter,
@@ -113,9 +113,8 @@
 
         // Various scales. These domains make assumptions of data, naturally.
         var xScale = d3.scale.linear().domain([0, 25]).range([0, width]),
-                yScale = d3.scale.linear().domain([0, 120000]).range([height, 0]),
-                radiusScale = d3.scale.sqrt().domain([0, 5e8]).range([0, 40]),
-                colorScale = d3.scale.category10();
+                yScale = d3.scale.linear().domain([1, 120000]).range([height, 0]),
+                radiusScale = d3.scale.sqrt().domain([0, 5e8]).range([0, 40]);
 
         // The x & y axes.
         var xAxis = d3.svg.axis().orient("bottom").scale(xScale).ticks(25),
