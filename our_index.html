@@ -50,25 +50,22 @@
 <div id="chart"></div>
 
 <script type="text/javascript">
-
-//    var list = [{x: 1, y: 2}, {x: 4, y: 5}];
-//
-//    var convert = function(element) {
-//        return element.y;
-//    };
-//    var result = _.map(list, convert);
+    
+    // http://bost.ocks.org/mike/nations/
 
     var typesToColors = {
-        "Employment" : "#ff0000",
-        "Study" : "#00ff00",
-        "Family route" : "#0000ff",
-        "Dep. joining / acc" : "#cc0000",
+        "Employment" : "#4169e1",
+        "Study" : "#87ceeb",
+        "Family route" : "#8a2be2",
+        "Dep. joining / acc" : "#b0e0e6",
         "Other" : "#cccccc"
     };
 
+    var quarters = ["Q1 2005", "Q2 2005", "Q3 2005", "Q4 2005", "Q1 2006", "Q2 2006", "Q3 2006", "Q4 2006", "Q1 2007", "Q2 2007", "Q3 2007", "Q4 2007", "Q1 2008", "Q2 2008", "Q3 2008", "Q4 2008", "Q1 2009", "Q2 2009", "Q3 2009", "Q4 2009", "Q1 2010", "Q2 2010", "Q3 2010", "Q4 2010", "Q1 2011"];
+
     d3.csv("control-immigration-q1-2011-main.csv", function(unparsedData) {
         var interestingData = unparsedData.slice(18);
-        var convert = function(quarter, value, type) {
+        var convert = function(quarter, value, type, type2, person) {
             var value = value.replace(/,/, ''); // get rid of formatting
             var parsedNumber = parseInt(value);
             if (isNaN(parsedNumber)) {  // deal with funny characters
@@ -78,36 +75,35 @@
                 x: quarter,
                 y: parsedNumber,
                 radius: 10,
-                color: typesToColors[type]
+                color: typesToColors[type],
+                type: type,
+                type2: type2,
+                person: person
             };
         };
-        var resultList = [];
-        var quarters = ["Q1 2005", "Q2 2005", "Q3 2005", "Q4 2005", "Q1 2006", "Q2 2006", "Q3 2006", "Q4 2006", "Q1 2007", "Q2 2007", "Q3 2007", "Q4 2007", "Q1 2008", "Q2 2008", "Q3 2008", "Q4 2008", "Q1 2009", "Q2 2009", "Q3 2009", "Q4 2009", "Q1 2010", "Q2 2010", "Q3 2010", "Q4 2010", "Q1 2011"];
 
-        var typeRow = interestingData["Type"];
-        console.log("Types", interestingData);
-
+        var resultsByQuarter = {};
         _.each(quarters, function(key, index) {
             var result = interestingData.map(function(row) {
                 var type = row["Type"];
+                var type2 = row["Type 2"];
+                var person = row["Person"];
                 var value = row[key];
-                return convert(index + 1, value, type);
+                return convert(index + 1, value, type, type2, person);
             });
-            resultList = resultList.concat(result);
+            resultsByQuarter[key] = result;
         });
 
-        drawChart(resultList);
+        drawChart(resultsByQuarter);
     });
 
     var drawChart = function(data) {
-        d3.csv("control-immigration-q1-2011-main.csv")
-                .row(function(row) { return row["Q1 2005"]; });
 
-        console.log(data);
+        // console.log(data);
 
         // Chart dimensions.
         var margin = {top: 19.5, right: 19.5, bottom: 19.5, left: 39.5},
-                width = 960 - margin.right,
+                width = 300 - margin.right,
                 height = 500 - margin.top - margin.bottom;
 
 
@@ -138,21 +134,57 @@
                 .attr("class", "y axis")
                 .call(yAxis);
 
-// Add a dot per nation. Initialize the data at 1800, and set the colors.
 
-
-//        var data = [
-//            {color: "#ff0000", x: 10, y: 60000, radius: 100 }
-//        ];
         var dot = svg.append("g")
                 .attr("class", "dots")
                 .selectAll(".dot")
-                .data(data)
+                .data(data[quarters[0]])
                 .enter().append("circle")
                 .attr("class", "dot")
                 .style("fill", function(d) { return d.color; })
                 .call(position);
+        
+        dot.append("title")
+            .text(function(d) { return d.type; });
 
+        svg.transition()
+          .duration(2000)
+          .ease("linear")
+          .tween("quarter", tweenQuarter);
+
+        // Tweens the entire chart by first tweening the year, and then the data.
+        // For the interpolated data, the dots and label are redrawn.
+        function tweenQuarter() {
+            var quarter = d3.interpolateNumber(1, 25);
+            return function(t) { displayQuarter(quarter(t)); };
+        }
+
+        function endAnimation() {
+            console.log("ending");
+            svg.transition().duration(0);
+        }
+
+        // Updates the display to show the specified year.
+        function displayQuarter(quarterIndex) {
+            dot.data(interpolateData(quarterIndex)).call(position);
+            //label.text(Math.round(quarterIndex));
+        }
+
+        // Interpolates the dataset for the given quarter
+        function interpolateData(quarterIndex) {
+            if (quarterIndex >= quarters.length - 1) {
+                endAnimation();
+            } else {
+                return data[quarters[Math.round(quarterIndex)]].map(function(d) {
+                    return {
+                        x: d.x,
+                        y: d.y,
+                        radius: 10,
+                        color: typesToColors["type"]
+                    };
+                });
+            }
+        }
 
         function position(dot) {
             dot .attr("cx", function(d) { return xScale(d.x); })
@@ -160,11 +192,13 @@
                     .attr("r", function(d) { return d.radius; });
         }
 
+
+
     };
 
 
 
 </script>
-<p>hello world</p>
+
 </body>
 </html>
